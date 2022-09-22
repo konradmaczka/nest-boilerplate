@@ -9,6 +9,6 @@ export class UserService {
   constructor(@InjectRepository(UserEntity) private userRepository: Repository<UserEntity>) {}
 
   getSelf(id: number): Promise<UserGetSelfResponseDTO> {
-    return this.userRepository.findOne({ id }, { select: ['id', 'login', 'isAdmin', 'createdAt'] })
+    return this.userRepository.findOne({ where: { id }, select: ['id', 'login', 'isAdmin', 'createdAt'] })
   }
 }

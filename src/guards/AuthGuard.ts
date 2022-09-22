@@ -1,6 +1,6 @@
 import { CanActivate, ExecutionContext, HttpException, HttpStatus, Injectable } from '@nestjs/common'
 import { Observable } from 'rxjs'
-import { decrypt } from 'src/utils/cryptography'
+import { decrypt } from '../utils/cryptography'
 
 @Injectable()
 export class AuthGuard implements CanActivate {

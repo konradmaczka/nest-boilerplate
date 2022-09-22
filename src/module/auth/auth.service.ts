@@ -36,7 +36,7 @@ export class AuthService {
   }
 
   async login({ login, password }: AuthLoginParamDTO): Promise<AuthLoginResponseDTO> {
-    const user = await this.userRepository.findOne({ login })
+    const user = await this.userRepository.findOne({ where: { login } })
 
     if (!user) {
       throw new HttpException({ statusCode: HttpStatus.UNAUTHORIZED }, HttpStatus.UNAUTHORIZED)
