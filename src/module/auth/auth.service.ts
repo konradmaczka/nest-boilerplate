@@ -1,24 +1,30 @@
 import crypto = require('crypto')
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common'
-import { InjectRepository } from '@nestjs/typeorm'
-import { UserEntity } from 'src/entities/user.entity'
-import { Repository } from 'typeorm'
 import { AuthRegisterParamDTO, AuthLoginParamDTO, AuthLoginResponseDTO } from './dto/auth.dto'
 import { encrypt } from 'src/utils/cryptography'
+import { InjectModel } from '@nestjs/mongoose'
+import { User, UserDocument } from 'src/models/User.model'
+import { Model } from 'mongoose'
+
 
 @Injectable()
 export class AuthService {
-  constructor(@InjectRepository(UserEntity) private userRepository: Repository<UserEntity>) {}
+  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
   async register({ login, password }: AuthRegisterParamDTO) {
     try {
+      const exists = await this.userModel.findOne({ login })
+      if (exists) {
+        throw new Error('ER_DUP_ENTRY')
+      }
+
       const salt = crypto.randomBytes(32).toString('hex')
       const hash = crypto
         .createHash('sha256')
         .update(salt + password)
         .digest('hex')
-
-      await this.userRepository.insert({ login, password: hash, salt })
+      
+      await this.userModel.create({ login, password: hash, salt, isAdmin: false })
 
       return { success: true }
     } catch (error) {
@@ -36,7 +42,7 @@ export class AuthService {
   }
 
   async login({ login, password }: AuthLoginParamDTO): Promise<AuthLoginResponseDTO> {
-    const user = await this.userRepository.findOne({ where: { login } })
+    const user = await this.userModel.findOne({ login })
 
     if (!user) {
       throw new HttpException({ statusCode: HttpStatus.UNAUTHORIZED }, HttpStatus.UNAUTHORIZED)
@@ -61,9 +67,8 @@ export class AuthService {
     }
 
     const tokenData = {
-      id: user.id,
+      id: user._id,
       isAdmin: user.isAdmin,
-      createdAt: user.createdAt,
       tokenCreatedAt: new Date().getTime(),
       tokenValidTill: new Date().getTime() + Number(process.env.TOKEN_VALID_MS),
     }

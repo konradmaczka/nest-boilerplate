@@ -9,7 +9,4 @@ export class UserGetSelfResponseDTO {
 
   @ApiResponseProperty()
   isAdmin: boolean
-
-  @ApiResponseProperty()
-  createdAt: Date
 }

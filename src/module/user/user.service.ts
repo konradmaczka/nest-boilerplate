@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common'
-import { UserEntity } from '../../entities/user.entity'
-import { Repository } from 'typeorm'
-import { InjectRepository } from '@nestjs/typeorm'
 import { UserGetSelfResponseDTO } from './dto/user.dto'
+import { InjectModel } from '@nestjs/mongoose'
+import { User, UserDocument } from 'src/models/User.model'
+import { Model } from 'mongoose'
 
 @Injectable()
 export class UserService {
-  constructor(@InjectRepository(UserEntity) private userRepository: Repository<UserEntity>) {}
+  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
-  getSelf(id: number): Promise<UserGetSelfResponseDTO> {
-    return this.userRepository.findOne({ where: { id }, select: ['id', 'login', 'isAdmin', 'createdAt'] })
+  async getSelf(id: number): Promise<UserGetSelfResponseDTO> {
+    return await this.userModel.findOne({ _id: id }).then((user) => ({ id: user._id, login: user.login, isAdmin: user.isAdmin })) as UserGetSelfResponseDTO
   }
 }

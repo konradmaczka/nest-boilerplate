@@ -17,7 +17,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Login user (email+password)' })
   @Post('/login')
   @HttpCode(HttpStatus.OK)
-  login(@Body() { login, password }: AuthLoginParamDTO): Promise<AuthLoginResponseDTO> {
+  login(@Body() { login, password }: AuthLoginParamDTO) {
     return this.authService.login({ login, password })
   }
 }
